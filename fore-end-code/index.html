@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>招聘管理系统</title>
+<link rel="stylesheet" href="./vendor/element-plus.css">
+<script src="./vendor/vue.global.prod.js"></script>
+<script src="./vendor/element-plus.full.min.js"></script>
+<script src="./vendor/element-plus-icons.iife.min.js"></script>
+<style>
+  :root{--brand:#2f6fed;--brand-dark:#1d4fd0;--bg:#f4f6fb;--side-bg:#1f2937;--side-active:#2f6fed}
+  *{box-sizing:border-box}
+  html,body,#app{height:100%;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",Arial,sans-serif;background:var(--bg);color:#1f2937}
+  [v-cloak]{display:none}
+  .boot{height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;flex-direction:column;gap:12px}
+  /* 登录页 */
+  .login-wrap{height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e3a8a 0%,#2f6fed 45%,#38bdf8 100%);position:relative;overflow:hidden}
+  .login-wrap::after{content:"";position:absolute;width:720px;height:720px;border-radius:50%;background:rgba(255,255,255,.07);right:-220px;top:-260px}
+  .login-card{width:420px;background:#fff;border-radius:16px;padding:32px 36px 24px;box-shadow:0 18px 50px rgba(15,23,42,.28);position:relative;z-index:2}
+  .login-logo{text-align:center;margin-bottom:20px}
+  .login-logo .t{font-size:23px;font-weight:700;letter-spacing:1px}
+  .login-logo .s{font-size:12.5px;color:#94a3b8;margin-top:6px;letter-spacing:.5px}
+  .demo-box{margin-top:14px;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#64748b}
+  .demo-acc{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+  .demo-acc span{cursor:pointer;background:#fff;border:1px solid #dbeafe;color:#2f6fed;border-radius:6px;padding:3px 9px}
+  .demo-acc span:hover{background:#eff6ff}
+  /* 主框架 */
+  .layout{height:100%;display:flex}
+  .side{width:222px;background:var(--side-bg);display:flex;flex-direction:column;flex-shrink:0;transition:width .2s}
+  .side.collapsed{width:64px}
+  .side .brand{height:58px;display:flex;align-items:center;gap:10px;padding:0 18px;color:#fff;font-weight:600;font-size:15.5px;border-bottom:1px solid rgba(255,255,255,.08);white-space:nowrap;overflow:hidden}
+  .side .brand .dot{width:26px;height:26px;border-radius:7px;background:var(--brand);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .side-menu{flex:1;overflow-y:auto;padding:8px 0}
+  .side-menu::-webkit-scrollbar{width:5px}
+  .side-menu::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}
+  .menu-group{padding:13px 18px 6px;font-size:11.5px;color:#64748b;letter-spacing:1px;white-space:nowrap}
+  .side.collapsed .menu-group{text-align:center;padding:13px 0 6px;font-size:10px}
+  .menu-item{display:flex;align-items:center;gap:11px;height:42px;padding:0 18px;color:#cbd5e1;cursor:pointer;font-size:14px;border-left:3px solid transparent;white-space:nowrap;overflow:hidden}
+  .menu-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .menu-item.active{background:rgba(47,111,237,.18);color:#fff;border-left-color:var(--side-active)}
+  .menu-item .ico{width:18px;text-align:center;flex-shrink:0}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{height:58px;background:#fff;border-bottom:1px solid #e8edf5;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+  .topbar .left{display:flex;align-items:center;gap:14px;font-size:15px;font-weight:600}
+  .topbar .right{display:flex;align-items:center;gap:14px}
+  .crumb{color:#94a3b8;font-weight:400;font-size:13px}
+  .content{flex:1;overflow-y:auto;padding:18px 20px 34px}
+  .card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,.06);margin-bottom:16px}
+  .card h3{margin:0 0 14px;font-size:15.5px;display:flex;align-items:center;gap:8px}
+  .card h3 .bar{width:3px;height:15px;background:var(--brand);border-radius:2px}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .toolbar .grow{flex:1}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
+  .stat{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 3px rgba(15,23,42,.06);display:flex;justify-content:space-between;align-items:center}
+  .stat .n{font-size:26px;font-weight:700;line-height:1.2}
+  .stat .l{font-size:13px;color:#64748b;margin-top:4px}
+  .stat .ic{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .jdesc{white-space:pre-wrap;line-height:1.75;font-size:13.5px;color:#475569}
+  .muted{color:#94a3b8;font-size:12.5px}
+  .el-table .cell{font-size:13.5px}
+  .job-card{border:1px solid #e8edf5;border-radius:10px;padding:14px 16px;margin-bottom:12px;transition:.18s;cursor:pointer}
+  .job-card:hover{border-color:var(--brand);box-shadow:0 6px 18px rgba(47,111,237,.12);transform:translateY(-1px)}
+  .job-card .jt{font-size:15.5px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .job-card .jp{color:#ef4444;font-weight:600;font-size:15px;margin-left:10px}
+  .job-card .jm{color:#64748b;font-size:13px;margin-top:7px;display:flex;gap:16px;flex-wrap:wrap}
+  .funnel-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .funnel-row .name{width:88px;font-size:13px;color:#475569;flex-shrink:0}
+  .funnel-row .bar{height:24px;border-radius:5px;background:linear-gradient(90deg,#2f6fed,#60a5fa);display:flex;align-items:center;justify-content:flex-end;padding-right:8px;color:#fff;font-size:12px;min-width:30px;transition:width .4s}
+  .portal-hero{background:linear-gradient(120deg,#1e3a8a,#2f6fed 60%,#38bdf8);color:#fff;border-radius:14px;padding:26px 28px;margin-bottom:16px}
+  .portal-hero h2{margin:0 0 8px;font-size:22px}
+  .portal-hero p{margin:0;opacity:.92;font-size:13.5px}
+  .centered{display:flex;align-items:center;justify-content:center;min-height:50vh;color:#94a3b8}
+  .note{background:#fffbeb;border-left:3px solid #f59e0b;padding:9px 12px;border-radius:6px;font-size:12.5px;color:#92400e;margin-bottom:14px}
+  .flow-steps{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .flow-steps .s{font-size:12px;padding:3px 10px;border-radius:20px;background:#f1f5f9;color:#64748b}
+  .flow-steps .s.done{background:#dcfce7;color:#16a34a}
+  .flow-steps .s.now{background:#dbeafe;color:#2563eb;font-weight:600}
+  .fatal{padding:28px;font-family:Consolas,monospace;font-size:13px;color:#b91c1c;line-height:1.9}
+  .fatal code{background:#f1f5f9;padding:1px 6px;border-radius:4px;color:#0f172a}
+</style>
+</head>
+<body>
+<div id="app" v-cloak>
+  <div class="boot">正在加载招聘管理系统…</div>
+</div>
+<div id="fatal" class="fatal" style="display:none"></div>
+
+<!-- ============ 1) 渲染语法糖 + 页面骨架 ============ -->
+<script src="./js/00-helpers.js"></script>
+<!-- ============ 2) 配置 + 枚举 + 数据 ============ -->
+<script src="./js/01-config-and-data.js"></script>
+<!-- ============ 3) Mock 接口层 ============ -->
+<script src="./js/02-api.js"></script>
+<!-- ============ 4) 管理端页面 ============ -->
+<script src="./js/03-pages.js"></script>
+<!-- ============ 5) 应聘者门户 ============ -->
+<script src="./js/04-portal.js"></script>
+<!-- ============ 6) 应用外壳：路由 / 布局 / 登录 / 看板 ============ -->
+<script src="./js/05-app.js"></script>
+
+<!-- ============ 7) 启动 ============ -->
+<script>
+(function () {
+  const app = Vue.createApp({
+    setup() {
+      syncRoute();
+      Vue.onMounted(async () => {
+        const token = localStorage.getItem('recruit_token');
+        if (token) {
+          try {
+            const r = await http.get('/auth/info');
+            if (r.code === 200) { Store.user = r.data.userInfo; Store.permissions = r.data.permissions; }
+            else localStorage.removeItem('recruit_token');
+          } catch (e) { localStorage.removeItem('recruit_token'); }
+        }
+        Store.ready = true;
+        guard();
+        /* 已登录状态刷新时若停在登录页，直接送回对应首页 */
+        if (Store.user && matchRoute(Store.route).route.path === '/login') {
+          go(isCandidate() ? '/portal/jobs' : (hasPerm('dashboard:view') ? '/dashboard' : '/jobs'));
+        }
+      });
+      Vue.watch(() => Store.route, guard);
+      /* 路由守卫：需登录的路由在未登录时跳登录页，并记住原目标以便登录后返回 */
+      function guard() {
+        const m = matchRoute(Store.route);
+        const logged = !!Store.user;
+        if (!m.route.pub && !logged) {
+          sessionStorage.setItem('recruit_from', Store.route);
+          go('/login');
+          return;
+        }
+        /* 权限校验只针对管理端路由：公开路由不校验，应聘者账号不做后台菜单权限判断 */
+        if (logged && !m.route.pub && !isCandidate() && !hasPerm(m.route.perm)) {
+          ElementPlus.ElMessage.warning('无访问权限：' + m.route.title);
+          go(hasPerm('dashboard:view') ? '/dashboard' : '/portal/jobs');
+        }
+      }
+      return () => {
+        if (!Store.ready) return Vue.h('div', { class: 'boot' }, '正在加载招聘管理系统…');
+        const m = matchRoute(Store.route);
+        if (m.route.path === '/login') return Vue.h(PageLogin);
+        if (!Store.user) {
+          /* 未登录：公开页（职位检索/职位详情）走游客门户外壳，其余交给守卫跳登录 */
+          return Vue.h(m.route.pub ? PortalShell : PageLogin);
+        }
+        return Vue.h(isCandidate() ? PortalShell : AppShell);
+      };
+    }
+  });
+  app.use(ElementPlus, { locale: ElementPlus.zhCn });
+  Object.entries(ElementPlusIconsVue).forEach(([k, c]) => app.component(k, c));
+  /* 注册页面与公共组件 */
+  const comps = {
+    'Pager': Pager, 'AppStatusTag': AppStatusTag, 'JobStatusTag': JobStatusTag, 'TagChip': TagChip,
+    'page-login': PageLogin, 'page-dashboard': PageDashboard,
+    'page-job-list': PageJobList, 'page-job-category': PageJobCategory,
+    'page-resume-list': PageResumeList, 'page-candidate-list': PageCandidateList,
+    'page-flow': PageFlow, 'page-interview': PageInterview, 'page-offer': PageOffer,
+    'page-tags': PageTags, 'page-users': PageUsers, 'page-roles': PageRoles,
+    'page-depts': PageDepts, 'page-logs': PageLogs,
+    'page-portal-jobs': PagePortalJobs, 'page-portal-job-detail': PagePortalJobDetail,
+    'page-portal-mine': PagePortalMine
+  };
+  Object.entries(comps).forEach(([k, v]) => { if (v) app.component(k, v); });
+
+  function fatal(title, err) {
+    const el = document.getElementById('fatal');
+    el.style.display = 'block';
+    el.innerHTML = '<b>' + title + '</b><br>' + String(err && err.stack || err).replace(/</g, '&lt;') +
+      '<br><br>若为 vendor 资源加载失败，请在本目录启动静态服务后访问（见 README.md）：<br>' +
+      '<code>python -m http.server 5173</code> 或 <code>npx serve .</code>';
+  }
+  window.addEventListener('error', (e) => {
+    if (e && e.target && e.target.tagName === 'SCRIPT') fatal('资源加载失败：' + (e.target.src || ''), '请检查 vendor/ 与 js/ 目录是否完整。');
+  }, true);
+  app.config.errorHandler = (err, instance, info) => {
+    /* 单个组件渲染异常不阻断整页：打印到控制台并提示，便于定位 */
+    console.error('[招聘管理系统] 组件异常：', info, err);
+    ElementPlus.ElMessage.error('页面组件异常：' + (err && err.message || err));
+  };
+  try { app.mount('#app'); } catch (e) { fatal('启动失败', e); }
+})();
+</script>
+</body>
+</html>
